@@ -16,4 +16,13 @@ model User {
     email    String   @unique
     roles    String[]
     position Int      @default(autoincrement())
+    images   Image[]
+}
+
+model Image {
+    id       String @id @default(cuid())
+    url      String
+    position Int
+    user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId   String
 }

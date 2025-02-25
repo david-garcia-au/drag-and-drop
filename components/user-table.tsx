@@ -1,4 +1,4 @@
-import { createUser, updateUser, deleteUser } from "@/app/lib/actions";
+import { createUser, updateUser, deleteUser } from "@/lib/actions";
 import { UserTableClient } from "./user-table-client";
 import type { User } from "@prisma/client";
 

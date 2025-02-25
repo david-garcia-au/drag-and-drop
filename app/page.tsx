@@ -1,4 +1,4 @@
-import { getUsers } from "./lib/actions";
+import { getUsers } from "../lib/actions";
 import { UserTable } from "@/components/user-table";
 
 export default async function Home() {
