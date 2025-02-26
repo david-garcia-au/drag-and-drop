@@ -152,10 +152,11 @@ export async function createUser(
       email: newEmail,
       position: newPosition,
     },
-    include: {
-      images: true,
-    },
+    // include: {
+    //   images: true,
+    // },
   });
+  console.log("newUser", newUser);
   revalidatePath("/");
   return newUser;
 }

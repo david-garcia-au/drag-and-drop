@@ -1,7 +1,7 @@
 import { UserForm } from "@/components/user-form";
 import { updateUser } from "@/lib/actions";
 import { PrismaClient } from "@prisma/client";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 const prisma = new PrismaClient();
 
@@ -27,8 +27,11 @@ export default async function EditUserPage({
 
   async function handleUpdate(data: any) {
     "use server";
-    await updateUser(params.id, data);
-    redirect("/");
+    const updatedUser = await updateUser(params.id, data);
+    if (!updatedUser) {
+      return { success: false, error: "Failed to update user" };
+    }
+    return { success: true };
   }
 
   return (

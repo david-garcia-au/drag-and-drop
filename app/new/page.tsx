@@ -1,6 +1,5 @@
 import { UserForm } from "@/components/user-form";
 import { createUser, uploadImages } from "@/lib/actions";
-import { redirect } from "next/navigation";
 
 export default function NewUserPage() {
   async function handleCreate(data: any, tempImages?: File[]) {
@@ -14,7 +13,10 @@ export default function NewUserPage() {
       await uploadImages(newUser.id, tempImages);
     }
 
-    redirect("/");
+    if (!newUser) {
+      return { success: false, error: "Failed to create user" };
+    }
+    return { success: true };
   }
 
   return (

@@ -19,6 +19,7 @@
 //   PopoverContent,
 //   PopoverTrigger,
 // } from "@/components/ui/popover";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 // import { Check, ChevronsUpDown, X, GripVertical } from "lucide-react";
 // import { cn } from "@/lib/utils";
 // import { useRouter } from "next/navigation";
@@ -45,10 +46,14 @@
 //   verticalListSortingStrategy,
 // } from "@dnd-kit/sortable";
 // import { CSS } from "@dnd-kit/utilities";
+// import { toast } from "sonner";
 
 // interface UserFormProps {
 //   user?: User & { images?: Image[] };
-//   onSubmit: (user: Omit<User, "id">, tempImages?: File[]) => Promise<void>;
+//   onSubmit: (
+//     user: Omit<User, "id">,
+//     tempImages?: File[]
+//   ) => Promise<{ success: boolean; error?: string }>;
 // }
 
 // export const ROLES = ["Admin", "User", "Editor"];
@@ -157,12 +162,25 @@
 
 //   const handleSubmit = async (e: React.FormEvent) => {
 //     e.preventDefault();
-//     await onSubmit({ name, email, roles }, tempImages);
+//     const result = await onSubmit({ name, email, roles }, tempImages);
+//     if (result.success) {
+//       toast.success(`${user ? "User updated" : "User created"} successfully.`);
+//       router.push("/");
+//     } else {
+//       toast.error(
+//         `Error  ${user ? "updating" : "creating"} user. Please try again.`
+//       );
+//     }
 //   };
 
 //   const handleImageDelete = async (imageId: string) => {
-//     await deleteImage(imageId);
-//     setImages((prev) => prev.filter((img) => img.id !== imageId));
+//     try {
+//       await deleteImage(imageId);
+//       setImages((prev) => prev.filter((img) => img.id !== imageId));
+//       toast.success(`Image deleted successfully.`);
+//     } catch (error) {
+//       toast.error(`Error deleting image. Please try again.`);
+//     }
 //   };
 
 //   const handleTempImageDelete = (index: number) => {
@@ -221,127 +239,135 @@
 //   }, [tempImagePreviews]);
 
 //   return (
-//     <form onSubmit={handleSubmit} className="space-y-6">
-//       <div>
-//         <Label htmlFor="name">Name</Label>
-//         <Input
-//           id="name"
-//           value={name}
-//           onChange={(e) => setName(e.target.value)}
-//           required
-//         />
-//       </div>
-//       <div>
-//         <Label htmlFor="email">Email</Label>
-//         <Input
-//           id="email"
-//           type="email"
-//           value={email}
-//           onChange={(e) => setEmail(e.target.value)}
-//           required
-//         />
-//       </div>
-//       <div>
-//         <Label>Roles</Label>
-//         <Popover open={open} onOpenChange={setOpen}>
-//           <PopoverTrigger asChild>
-//             <Button
-//               variant="outline"
-//               role="combobox"
-//               aria-expanded={open}
-//               className="w-full justify-between"
-//             >
-//               {roles.length > 0 ? roles.join(", ") : "Select roles..."}
-//               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-//             </Button>
-//           </PopoverTrigger>
-//           <PopoverContent className="w-full p-0">
-//             <Command>
-//               <CommandInput placeholder="Search roles..." />
-//               <CommandList>
-//                 <CommandEmpty>No role found.</CommandEmpty>
-//                 <CommandGroup>
-//                   {ROLES.map((role) => (
-//                     <CommandItem
-//                       key={role}
-//                       onSelect={() => {
-//                         setRoles((prev) =>
-//                           prev.includes(role)
-//                             ? prev.filter((r) => r !== role)
-//                             : [...prev, role]
-//                         );
-//                       }}
-//                     >
-//                       <Check
-//                         className={cn(
-//                           "mr-2 h-4 w-4",
-//                           roles.includes(role) ? "opacity-100" : "opacity-0"
-//                         )}
-//                       />
-//                       {role}
-//                     </CommandItem>
-//                   ))}
-//                 </CommandGroup>
-//               </CommandList>
-//             </Command>
-//           </PopoverContent>
-//         </Popover>
-//       </div>
-//       <div className="space-y-4">
-//         <div>
-//           <Label>Upload Images</Label>
-//           <ImageUploader
-//             onUpload={handleImageUpload}
-//             isUploading={isUploading}
-//           />
-//         </div>
-
-//         {/* Temporary image previews for new users */}
-//         {!user && tempImagePreviews.length > 0 && (
+//     <form onSubmit={handleSubmit}>
+//       <Tabs defaultValue="details" className="w-full">
+//         <TabsList className="grid w-full grid-cols-2">
+//           <TabsTrigger value="details">User Details</TabsTrigger>
+//           <TabsTrigger value="images">Images</TabsTrigger>
+//         </TabsList>
+//         <TabsContent value="details" className="space-y-6">
 //           <div>
-//             <Label>Selected Images</Label>
-//             <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-//               {tempImagePreviews.map((url, index) => (
-//                 <ImagePreview
-//                   key={index}
-//                   url={url}
-//                   onDelete={() => handleTempImageDelete(index)}
-//                 />
-//               ))}
-//             </div>
+//             <Label htmlFor="name">Name</Label>
+//             <Input
+//               id="name"
+//               value={name}
+//               onChange={(e) => setName(e.target.value)}
+//               required
+//             />
 //           </div>
-//         )}
-
-//         {/* Existing images for editing users */}
-//         {user && images.length > 0 && (
 //           <div>
-//             <Label>Current Images</Label>
-//             <div className="mt-2 border rounded-lg p-4 bg-muted/50">
-//               <DndContext
-//                 sensors={sensors}
-//                 collisionDetection={closestCenter}
-//                 onDragEnd={handleDragEnd}
-//               >
-//                 <SortableContext
-//                   items={images.map((img) => img.id)}
-//                   strategy={verticalListSortingStrategy}
+//             <Label htmlFor="email">Email</Label>
+//             <Input
+//               id="email"
+//               type="email"
+//               value={email}
+//               onChange={(e) => setEmail(e.target.value)}
+//               required
+//             />
+//           </div>
+//           <div>
+//             <Label>Roles</Label>
+//             <Popover open={open} onOpenChange={setOpen}>
+//               <PopoverTrigger asChild>
+//                 <Button
+//                   variant="outline"
+//                   role="combobox"
+//                   aria-expanded={open}
+//                   className="w-full justify-between"
 //                 >
-//                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-//                     {images.map((image) => (
-//                       <SortableImage
-//                         key={image.id}
-//                         image={image}
-//                         onDelete={() => handleImageDelete(image.id)}
-//                       />
-//                     ))}
-//                   </div>
-//                 </SortableContext>
-//               </DndContext>
-//             </div>
+//                   {roles.length > 0 ? roles.join(", ") : "Select roles..."}
+//                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+//                 </Button>
+//               </PopoverTrigger>
+//               <PopoverContent className="w-full p-0">
+//                 <Command>
+//                   <CommandInput placeholder="Search roles..." />
+//                   <CommandList>
+//                     <CommandEmpty>No role found.</CommandEmpty>
+//                     <CommandGroup>
+//                       {ROLES.map((role) => (
+//                         <CommandItem
+//                           key={role}
+//                           onSelect={() => {
+//                             setRoles((prev) =>
+//                               prev.includes(role)
+//                                 ? prev.filter((r) => r !== role)
+//                                 : [...prev, role]
+//                             );
+//                           }}
+//                         >
+//                           <Check
+//                             className={cn(
+//                               "mr-2 h-4 w-4",
+//                               roles.includes(role) ? "opacity-100" : "opacity-0"
+//                             )}
+//                           />
+//                           {role}
+//                         </CommandItem>
+//                       ))}
+//                     </CommandGroup>
+//                   </CommandList>
+//                 </Command>
+//               </PopoverContent>
+//             </Popover>
 //           </div>
-//         )}
-//       </div>
-//       <div className="flex justify-end space-x-2">
+//         </TabsContent>
+//         <TabsContent value="images" className="space-y-6">
+//           <div>
+//             <Label>Upload Images</Label>
+//             <ImageUploader
+//               onUpload={handleImageUpload}
+//               isUploading={isUploading}
+//             />
+//           </div>
+
+//           {/* Temporary image previews for new users */}
+//           {!user && tempImagePreviews.length > 0 && (
+//             <div>
+//               <Label>Selected Images</Label>
+//               <div className="mt-2 grid grid-cols-3 gap-4">
+//                 {tempImagePreviews.map((url, index) => (
+//                   <ImagePreview
+//                     key={index}
+//                     url={url}
+//                     onDelete={() => handleTempImageDelete(index)}
+//                   />
+//                 ))}
+//               </div>
+//             </div>
+//           )}
+
+//           {/* Existing images for editing users */}
+//           {user && images.length > 0 && (
+//             <div>
+//               <Label>Current Images</Label>
+//               <div className="mt-2 border rounded-lg p-4 bg-muted/50">
+//                 <DndContext
+//                   sensors={sensors}
+//                   collisionDetection={closestCenter}
+//                   onDragEnd={handleDragEnd}
+//                 >
+//                   <SortableContext
+//                     items={images.map((img) => img.id)}
+//                     strategy={verticalListSortingStrategy}
+//                   >
+//                     <div className="grid grid-cols-3 gap-4">
+//                       {images.map((image) => (
+//                         <SortableImage
+//                           key={image.id}
+//                           image={image}
+//                           onDelete={() => handleImageDelete(image.id)}
+//                         />
+//                       ))}
+//                     </div>
+//                   </SortableContext>
+//                 </DndContext>
+//               </div>
+//             </div>
+//           )}
+//         </TabsContent>
+//       </Tabs>
+//       <div className="flex justify-end space-x-2 mt-6 pt-6 border-t">
 //         <Button type="button" variant="outline" onClick={() => router.back()}>
 //           Cancel
 //         </Button>
@@ -399,10 +425,14 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { toast } from "sonner";
 
 interface UserFormProps {
   user?: User & { images?: Image[] };
-  onSubmit: (user: Omit<User, "id">, tempImages?: File[]) => Promise<void>;
+  onSubmit: (
+    user: Omit<User, "id">,
+    tempImages?: File[]
+  ) => Promise<{ success: boolean; error?: string }>;
 }
 
 export const ROLES = ["Admin", "User", "Editor"];
@@ -511,12 +541,25 @@ export function UserForm({ user, onSubmit }: UserFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit({ name, email, roles }, tempImages);
+    const result = await onSubmit({ name, email, roles }, tempImages);
+    if (result.success) {
+      toast.success(`${user ? "User updated" : "User created"} successfully.`);
+      router.push("/");
+    } else {
+      toast.error(
+        `Error  ${user ? "updating" : "creating"} user. Please try again.`
+      );
+    }
   };
 
   const handleImageDelete = async (imageId: string) => {
-    await deleteImage(imageId);
-    setImages((prev) => prev.filter((img) => img.id !== imageId));
+    try {
+      await deleteImage(imageId);
+      setImages((prev) => prev.filter((img) => img.id !== imageId));
+      toast.success(`Image deleted successfully.`);
+    } catch (error) {
+      toast.error(`Error deleting image. Please try again.`);
+    }
   };
 
   const handleTempImageDelete = (index: number) => {
@@ -528,21 +571,27 @@ export function UserForm({ user, onSubmit }: UserFormProps) {
     const { active, over } = event;
     if (!over || active.id === over.id || !user) return;
 
-    setImages((items) => {
-      const oldIndex = items.findIndex((item) => item.id === active.id);
-      const newIndex = items.findIndex((item) => item.id === over.id);
-      const newOrder = arrayMove(items, oldIndex, newIndex);
+    const oldIndex = images.findIndex((item) => item.id === active.id);
+    const newIndex = images.findIndex((item) => item.id === over.id);
 
-      updateImagePositions(
+    // Update local state first
+    const newOrder = arrayMove(images, oldIndex, newIndex);
+    setImages(newOrder);
+
+    // Then update positions in the backend
+    try {
+      await updateImagePositions(
         user.id,
         newOrder.map((image, index) => ({
           id: image.id,
           newPosition: index + 1,
         }))
       );
-
-      return newOrder;
-    });
+    } catch (error) {
+      // Revert to previous order if update fails
+      setImages(images);
+      toast.error(`Failed to update image positions. Please try again.`);
+    }
   };
 
   const handleImageUpload = async (files: File[]) => {
