@@ -1,7 +1,9 @@
-import { UserForm } from "@/components/user-form";
+import { UserForm } from "@/components/users/user-form";
 import { updateUser } from "@/lib/actions";
 import { PrismaClient } from "@prisma/client";
 import { notFound } from "next/navigation";
+import { userFormSchema } from "@/lib/zodSchemas";
+import { z } from "zod";
 
 const prisma = new PrismaClient();
 
@@ -25,9 +27,20 @@ export default async function EditUserPage({
     notFound();
   }
 
-  async function handleUpdate(data: any) {
+  async function handleUpdate(values: z.infer<typeof userFormSchema>) {
     "use server";
-    const updatedUser = await updateUser(params.id, data);
+    // First we validate the form values
+    const parsed = userFormSchema.safeParse(values);
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: "Failed to create user, data validation failed",
+      };
+    }
+
+    // Then we update the user
+
+    const updatedUser = await updateUser(params.id, values);
     if (!updatedUser) {
       return { success: false, error: "Failed to update user" };
     }

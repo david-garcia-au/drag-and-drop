@@ -1,12 +1,26 @@
-import { UserForm } from "@/components/user-form";
+import { UserForm } from "@/components/users/user-form";
 import { createUser, uploadImages } from "@/lib/actions";
+import { userFormSchema } from "@/lib/zodSchemas";
+import { z } from "zod";
 
 export default function NewUserPage() {
-  async function handleCreate(data: any, tempImages?: File[]) {
+  async function handleCreate(
+    values: z.infer<typeof userFormSchema>,
+    tempImages?: File[]
+  ) {
     "use server";
 
-    // First create the user
-    const newUser = await createUser(data);
+    // First we validate the form
+    const parsed = userFormSchema.safeParse(values);
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: "Failed to create user, data validation failed",
+      };
+    }
+
+    // Then we create the user
+    const newUser = await createUser(values);
 
     // Then upload any temporary images
     if (tempImages && tempImages.length > 0) {

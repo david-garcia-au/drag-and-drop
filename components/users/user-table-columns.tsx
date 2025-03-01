@@ -33,7 +33,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { createUser, deleteUser } from "../lib/actions";
+import { createUser, deleteUser } from "@/lib/actions";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -211,10 +211,10 @@ export const columns = (
             </Link>
           </DropdownMenuItem>
           <AlertDialog>
-            <AlertDialogTrigger asChild>
+            <AlertDialogTrigger asChild className="bg-red-50">
               <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                <Trash className="mr-2 h-4 w-4" />
-                <span>Delete</span>
+                <Trash className="mr-2 h-4 w-4 text-red-600" />
+                <span className="text-red-600">Delete</span>
               </DropdownMenuItem>
             </AlertDialogTrigger>
             <AlertDialogContent>

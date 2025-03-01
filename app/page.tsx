@@ -1,5 +1,5 @@
+import { UserTableClient } from "@/components/users/user-table-client";
 import { getUsers } from "../lib/actions";
-import { UserTable } from "@/components/user-table";
 
 export default async function Home() {
   const users = await getUsers();
@@ -7,7 +7,7 @@ export default async function Home() {
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-2xl font-bold mb-4">User Management</h1>
-      <UserTable initialUsers={users} />
+      <UserTableClient initialUsers={users} />
     </div>
   );
 }

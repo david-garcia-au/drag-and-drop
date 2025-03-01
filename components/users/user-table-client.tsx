@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import type { User } from "@prisma/client";
-import { updateUserPositions } from "../lib/actions";
+import { updateUserPositions } from "@/lib/actions";
 import { columns } from "./user-table-columns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,13 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useRouter } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface UserTableClientProps {
   initialUsers: User[];
@@ -86,9 +93,14 @@ export function UserTableClient({ initialUsers }: UserTableClientProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const pageSizeOptions = [
+    { value: 8, label: "8" },
+    { value: 16, label: "16" },
+    { value: users.length, label: "All" },
+  ];
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 8,
+    pageSize: pageSizeOptions[0].value,
   });
 
   const tableColumns = useMemo(() => columns(setUsers), []);
@@ -121,6 +133,11 @@ export function UserTableClient({ initialUsers }: UserTableClientProps) {
         return newOrder;
       });
     }
+  };
+
+  const handlePageSizeChange = (newPageSize: string) => {
+    const size = Number.parseInt(newPageSize, 10);
+    table.setPageSize(size);
   };
 
   const table = useReactTable({
@@ -184,28 +201,50 @@ export function UserTableClient({ initialUsers }: UserTableClientProps) {
           </TableBody>
         </Table>
       </DndContext>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
+      <div className="flex items-center justify-between space-x-2 py-4">
+        <div className="flex items-center space-x-2">
+          <p className="text-sm font-medium">Rows per page</p>
+          <Select
+            value={table.getState().pagination.pageSize.toString()}
+            onValueChange={handlePageSizeChange}
+          >
+            <SelectTrigger className="h-8 w-[70px]">
+              <SelectValue
+                placeholder={table.getState().pagination.pageSize.toString()}
+              />
+            </SelectTrigger>
+            <SelectContent side="top">
+              {pageSizeOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value.toString()}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
+        <div className="flex items-center space-x-2">
+          <div className="flex-1 text-sm text-muted-foreground">
+            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount()}
+          </div>
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </div>
     </div>
