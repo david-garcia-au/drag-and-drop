@@ -1,0 +1,17 @@
+.ProseMirror p {
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror ul {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror li {
+  margin-bottom: 0.25em;
+}
+
+.ProseMirror {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}

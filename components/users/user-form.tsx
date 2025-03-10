@@ -51,12 +51,51 @@ import { z } from "zod";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import dynamic from "next/dynamic";
+const ReactQuill = dynamic(
+  async () => {
+    const { default: RQ } = await import("react-quill-new");
+    // Import Quill styles in the client
+    if (typeof window !== "undefined") {
+      await import("react-quill-new/dist/quill.snow.css");
+    }
+    return RQ;
+  },
+  { ssr: false }
+);
+
+const modules = {
+  toolbar: [
+    [{ "header": [1, 2, false] }],
+    ["bold", "italic", "underline", "strike", "blockquote"],
+    [
+      { "list": "ordered" },
+      { "list": "bullet" },
+      { "indent": "-1" },
+      { "indent": "+1" },
+    ],
+    ["link"],
+    ["clean"],
+  ],
+};
+
+const formats = [
+  "header",
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "blockquote",
+  "list",
+  "bullet",
+  "indent",
+  "link",
+];
 
 interface UserFormProps {
   user?: User & { images?: Image[] };
@@ -240,6 +279,7 @@ export function UserForm({ user, onSubmit }: UserFormProps) {
     defaultValues: {
       name: user?.name || "",
       email: user?.email || "",
+      bio: user?.bio || "",
       roles: user?.roles || [],
     },
   });
@@ -274,9 +314,10 @@ export function UserForm({ user, onSubmit }: UserFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(submitFormAction)}>
         <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="details">User Details</TabsTrigger>
             <TabsTrigger value="images">Images</TabsTrigger>
+            <TabsTrigger value="bio">Bio</TabsTrigger>
           </TabsList>
           <TabsContent value="details" className="space-y-6">
             <FormField
@@ -411,6 +452,30 @@ export function UserForm({ user, onSubmit }: UserFormProps) {
                 </div>
               </div>
             )}
+          </TabsContent>
+          <TabsContent value="bio" className="space-y-6">
+            <FormField
+              control={form.control}
+              name="bio"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bio</FormLabel>
+                  <FormControl>
+                    <div className="prose max-w-none [&_.ql-container]:!h-[300px]">
+                      <ReactQuill
+                        theme="snow"
+                        modules={modules}
+                        formats={formats}
+                        value={field.value}
+                        onChange={field.onChange}
+                        className="bg-white"
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </TabsContent>
         </Tabs>
         <div className="flex justify-end space-x-2 mt-6 pt-6 border-t">

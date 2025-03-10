@@ -13,6 +13,7 @@ export const userFormSchema = z.object({
   roles: z.array(z.string()).min(1, {
     message: "Please select at least one role.",
   }),
+  bio: z.string().max(300, "Bio must be less than 100 characters"),
 });
 
 // Type inference from the schema

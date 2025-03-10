@@ -11,12 +11,15 @@ datasource db {
 }
 
 model User {
-    id       String   @id @default(cuid())
-    name     String
-    email    String   @unique
-    roles    String[]
-    position Int      @default(autoincrement())
-    images   Image[]
+    id               String    @id @default(cuid())
+    name             String
+    email            String    @unique
+    roles            String[]
+    position         Int       @default(autoincrement())
+    dateOfBirth      DateTime?
+    hasDriverLicense Boolean   @default(false)
+    bio              String    @default("")
+    images           Image[]
 }
 
 model Image {
