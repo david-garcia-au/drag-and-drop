@@ -10,10 +10,12 @@ const prisma = new PrismaClient();
 export default async function EditUserPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
+
   const user = await prisma.user.findUnique({
-    where: { id: (await params).id },
+    where: { id: id },
     include: {
       images: {
         orderBy: {
@@ -40,7 +42,7 @@ export default async function EditUserPage({
 
     // Then we update the user
 
-    const updatedUser = await updateUser(params.id, values);
+    const updatedUser = await updateUser(id, values);
     if (!updatedUser) {
       return { success: false, error: "Failed to update user" };
     }
